@@ -1,0 +1,1 @@
+docker exec spark-master ./spark/bin/spark-submit ./batch-scripts/sandbox.py

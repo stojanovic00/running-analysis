@@ -7,6 +7,7 @@ def quiet_logs(sc):
   logger.LogManager.getLogger("org"). setLevel(logger.Level.ERROR)
   logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
 
+
 conf = SparkConf().setAppName("running-analysis").setMaster("local")
 sc = SparkContext(conf=conf)
 spark = SparkSession(sc)
