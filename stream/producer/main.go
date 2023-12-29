@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -45,7 +46,7 @@ func readCSV(path string) [][]string {
 
 func main() {
 	//Code from example: https://github.com/confluentinc/confluent-kafka-go
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost:9092,localhost:9093,localhost:9094,"})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost:9092,localhost:9093,localhost:9094"})
 	if err != nil {
 		panic(err)
 	}
@@ -71,16 +72,21 @@ func main() {
 
 	statsCsv := readCSV("../../datasets/half_marathon_realtime.csv")
 
-	for _, line := range statsCsv {
+	for idx, line := range statsCsv {
 		time.Sleep(1 * time.Second)
 
 		message := ""
 		for _, word := range line {
-			message += " " + word
+			if message == "" {
+				message += word
+			} else {
+				message += "," + word
+			}
 		}
 
 		p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+			Key:            []byte(strconv.Itoa(idx)),
 			Value:          []byte(message),
 		}, nil)
 	}

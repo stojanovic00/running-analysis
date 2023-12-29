@@ -3,3 +3,4 @@ datasets
 #Jetbrains
 .idea/*
 stream/producer/.idea/*
+stream/streams/.idea/*
