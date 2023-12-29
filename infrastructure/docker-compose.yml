@@ -107,7 +107,8 @@ services:
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.3.0
     container_name: hive-metastore-postgresql
-
+    volumes:
+      - hive-metastore:/var/lib/postgresql/data
 
   hue:
     image: gethue/hue:20201111-135001
@@ -198,6 +199,7 @@ volumes:
   hadoop_namenode:
   hadoop_datanode1:
   hadoop_datanode2:
+  hive-metastore:
   zoo:
   zoolog:
   kafka1:
