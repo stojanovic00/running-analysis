@@ -191,6 +191,51 @@ services:
       - zoo
     ulimits: *ulimits_def
 
+  citus-coordinator:
+    image:  "citusdata/citus:12.1.1"
+    container_name: citus_coordinator
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_MASTER: true
+    volumes:
+      - citus-coordinator:/var/lib/postgresql/data
+    ports:
+      - "5000:5432"
+
+  citus-worker1:
+    image: "citusdata/citus:12.1.1"
+    container_name: citus_worker1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_WORKER: 1
+      CITUS_MASTER_HOST: citus-coordinator
+    depends_on:
+      - citus-coordinator
+    volumes:
+      - citus-worker1:/var/lib/postgresql/data
+
+  citus-worker2:
+    image:  "citusdata/citus:12.1.1"
+    container_name: citus_worker2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_WORKER: 2
+      CITUS_MASTER_HOST: citus-coordinator
+    depends_on:
+      - citus-coordinator
+    volumes:
+      - citus-worker2:/var/lib/postgresql/data
+
+
 
 
 
@@ -205,3 +250,6 @@ volumes:
   kafka1:
   kafka2:
   kafka3:
+  citus-coordinator:
+  citus-worker1:
+  citus-worker2:
