@@ -80,6 +80,76 @@ services:
     env_file:
       - ./hadoop.env
   
+  citus-coordinator:
+    image:  "citusdata/citus:12.1.1"
+    container_name: citus-coordinator
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_MASTER: true
+    volumes:
+      - citus-coordinator:/var/lib/postgresql/data
+    ports:
+      - "5000:5432"
+
+  citus-node1:
+    image: "citusdata/citus:12.1.1"
+    container_name: citus-node1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_WORKER: 1
+      CITUS_MASTER_HOST: citus-coordinator
+    depends_on:
+      - citus-coordinator
+    volumes:
+      - citus-node1:/var/lib/postgresql/data
+
+  citus-node2:
+    image:  "citusdata/citus:12.1.1"
+    container_name: citus-node2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: citus
+      PGDATA: /var/lib/postgresql/data/pgdata
+      CITUS_WORKER: 2
+      CITUS_MASTER_HOST: citus-coordinator
+    depends_on:
+      - citus-coordinator
+    volumes:
+      - citus-node2:/var/lib/postgresql/data
+
+  metabase-db:
+    image: postgres:13.1-alpine
+    container_name: metabase-db
+    restart: always
+    volumes:
+      - metabase-db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=metabase-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    restart: always
+    environment:
+      MB_DB_TYPE: "postgres"
+      MB_DB_DBNAME: "metabase-db"
+      MB_DB_PORT: "5432"
+      MB_DB_USER: "postgres"
+      MB_DB_PASS: "postgres"
+      MB_DB_HOST: "metabase-db"
+    ports:
+      - 3000:3000
+    depends_on:
+      - metabase-db
 
   hue:
     image: gethue/hue:20201111-135001
@@ -92,6 +162,8 @@ services:
       - ./conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
+
+
   zoo:
     image: zookeeper:3.4.9
     container_name: zoo
@@ -162,54 +234,6 @@ services:
       - zoo
     ulimits: *ulimits_def
 
-  citus-coordinator:
-    image:  "citusdata/citus:12.1.1"
-    container_name: citus-coordinator
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
-      PGDATA: /var/lib/postgresql/data/pgdata
-      CITUS_MASTER: true
-    volumes:
-      - citus-coordinator:/var/lib/postgresql/data
-    ports:
-      - "5000:5432"
-
-  citus-worker1:
-    image: "citusdata/citus:12.1.1"
-    container_name: citus-worker1
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
-      PGDATA: /var/lib/postgresql/data/pgdata
-      CITUS_WORKER: 1
-      CITUS_MASTER_HOST: citus-coordinator
-    depends_on:
-      - citus-coordinator
-    volumes:
-      - citus-worker1:/var/lib/postgresql/data
-
-  citus-worker2:
-    image:  "citusdata/citus:12.1.1"
-    container_name: citus-worker2
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
-      PGDATA: /var/lib/postgresql/data/pgdata
-      CITUS_WORKER: 2
-      CITUS_MASTER_HOST: citus-coordinator
-    depends_on:
-      - citus-coordinator
-    volumes:
-      - citus-worker2:/var/lib/postgresql/data
-
-
-
-
-
 
 volumes:
   hadoop_namenode:
@@ -221,5 +245,6 @@ volumes:
   kafka2:
   kafka3:
   citus-coordinator:
-  citus-worker1:
-  citus-worker2:
+  citus-node1:
+  citus-node2:
+  metabase-db:
