@@ -6,6 +6,7 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - ../datasets:/localDatasets
+      - ../batch:/scripts
     environment:
       - CLUSTER_NAME=test
     env_file:
@@ -80,36 +81,6 @@ services:
       - ./hadoop.env
   
 
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-server
-    env_file:
-      - ./hadoop.env
-    environment:
-      HIVE_CORE_CONF_javax_jdo_option_ConnectionURL: "jdbc:postgresql://hive-metastore/metastore"
-      SERVICE_PRECONDITION: "hive-metastore:9083"
-    ports:
-      - "10000:10000"
-    ulimits: *ulimits_def
-  
-  hive-metastore:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    container_name: hive-metastore
-    env_file:
-      - ./hadoop.env
-    command: /opt/hive/bin/hive --service metastore
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870 datanode1:9864 datanode2:9864 hive-metastore-postgresql:5432"
-    ports:
-      - "9083:9083"
-    ulimits: *ulimits_def
-  
-  hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:2.3.0
-    container_name: hive-metastore-postgresql
-    volumes:
-      - hive-metastore:/var/lib/postgresql/data
-
   hue:
     image: gethue/hue:20201111-135001
     hostname: hue
@@ -120,7 +91,7 @@ services:
     volumes:
       - ./conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
-      - hive-server
+      - namenode
   zoo:
     image: zookeeper:3.4.9
     container_name: zoo
@@ -193,7 +164,7 @@ services:
 
   citus-coordinator:
     image:  "citusdata/citus:12.1.1"
-    container_name: citus_coordinator
+    container_name: citus-coordinator
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -207,7 +178,7 @@ services:
 
   citus-worker1:
     image: "citusdata/citus:12.1.1"
-    container_name: citus_worker1
+    container_name: citus-worker1
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -222,7 +193,7 @@ services:
 
   citus-worker2:
     image:  "citusdata/citus:12.1.1"
-    container_name: citus_worker2
+    container_name: citus-worker2
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -244,7 +215,6 @@ volumes:
   hadoop_namenode:
   hadoop_datanode1:
   hadoop_datanode2:
-  hive-metastore:
   zoo:
   zoolog:
   kafka1:

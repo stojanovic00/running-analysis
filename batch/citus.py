@@ -5,23 +5,20 @@ from pyspark.sql.functions import col
 
 conf = SparkConf() \
     .setAppName("batch-preprocessing-citus") \
-    .setMaster("spark://spark-master:7077")  # Executes job on whole cluster
+    .setMaster("spark://spark-master:7077")
 
-# this connects to hive clusters metastore
-# without it spark makes his own hive metastore, and by that we get 2 separate hive db instances
-
-# Initialize Spark session with hive support
 spark = SparkSession.builder \
     .config(conf=conf) \
     .getOrCreate()
 
-
-# Read CSV file from HDFS, infer schema, and modify column names
 df = spark.read.csv("hdfs://namenode:9000/user/aleksandar/data/batch_sample.csv", header=True, inferSchema=True)
 df = df.select([col(c).alias(c.replace(" ", "_")) for c in df.columns])
+reduced_df = df.select("Event_name", "Athlete_ID")
 
-
-# Write the DataFrame to Hive
-df.write.mode("overwrite").saveAsTable("runners")
-
-spark.stop()
+jdbc_url = "jdbc:postgresql://citus-coordinator:5432/postgres"
+properties = {
+    "user": "postgres",
+    "password": "postgres",
+    "driver": "org.postgresql.Driver"
+}
+reduced_df.write.jdbc(jdbc_url, "public.runners_reduced", mode="overwrite", properties=properties)
