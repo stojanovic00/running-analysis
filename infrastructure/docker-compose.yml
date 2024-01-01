@@ -234,6 +234,17 @@ services:
       - zoo
     ulimits: *ulimits_def
 
+  streams-db:
+    image: mongo:latest
+    container_name: streams-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - streams-db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+
 
 volumes:
   hadoop_namenode:
@@ -248,3 +259,4 @@ volumes:
   citus-node1:
   citus-node2:
   metabase-db:
+  streams-db:
