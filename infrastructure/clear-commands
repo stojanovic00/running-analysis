@@ -1,0 +1,3 @@
+use streams-db;
+db.getCollection("heart_rate").deleteMany({});
+db.getCollection("speed").deleteMany({});
