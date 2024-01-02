@@ -86,7 +86,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
+      POSTGRES_DB: running-analytics
       PGDATA: /var/lib/postgresql/data/pgdata
       CITUS_MASTER: true
     volumes:
@@ -100,7 +100,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
+      POSTGRES_DB: running-analytics
       PGDATA: /var/lib/postgresql/data/pgdata
       CITUS_WORKER: 1
       CITUS_MASTER_HOST: citus-coordinator
@@ -115,7 +115,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: citus
+      POSTGRES_DB: running-analytics
       PGDATA: /var/lib/postgresql/data/pgdata
       CITUS_WORKER: 2
       CITUS_MASTER_HOST: citus-coordinator
