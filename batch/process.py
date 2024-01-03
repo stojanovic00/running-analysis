@@ -118,5 +118,39 @@ distance_constrained_df = distance_constrained_df.drop("athlete_average_speed")
 # Add an artificial key column
 distance_constrained_df = distance_constrained_df.withColumn("id", monotonically_increasing_id())
 
+
+# Grouping marathons depending on size
+
+# Define the simplified bins
+dist_groups = [
+    (40, 65), (65, 90), (90, 120), (120, 200),
+    (200, 1000), (1000, 6000)
+]
+
+# Create a new column representing the distance group
+distance_constrained_df = distance_constrained_df.withColumn(
+    "distance_group_km",
+    when(
+        (col("distance_km").isNull() | (col("distance_km") < 40)),
+        None
+    ).otherwise(  # This makes case for every distance group
+    expr(
+        """
+        CASE {}
+        ELSE '{}'
+        END
+        """.format(
+            "".join(
+                [
+                    "WHEN distance_km >= {} AND distance_km < {} THEN '{}'\n".format(lower, upper, f"{lower}-{upper}")
+                    for lower, upper in dist_groups
+                ]
+            ),
+            None
+        )
+    )
+)
+)
+
 # Writing distance_constrained to db
 distance_constrained_df.write.jdbc(jdbc_url, "public.running_distance_constrained", mode="overwrite", properties=pg_properties)
