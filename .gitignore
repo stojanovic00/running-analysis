@@ -1,5 +1,6 @@
 datasets
 .fuse_hidden*
+todo.md
 
 #Jetbrains
 .idea/*
