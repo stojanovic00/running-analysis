@@ -4,6 +4,8 @@ todo.md
 
 #Jetbrains
 .idea/*
-stream/producer/.idea/*
-stream/consumer/.idea/*
+stream/producer_consumer/producer/.idea/*
+stream/producer_consumer/consumer/.idea/*
 stream/streams/.idea/*
+stream/.idea/*
+stream/producer_consumer/.idea/*

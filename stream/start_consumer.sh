@@ -7,4 +7,6 @@ if [ -z "$1" ]; then
 fi
 
 docker exec -it  kafka1 kafka-console-consumer --bootstrap-server "kafka1:19092,kafka2:19093,kafka3:19094"  --topic $1
- # --from-beginning can be added
+
+# this is for proper double deser
+#--property value.deserializer=org.apache.kafka.common.serialization.DoubleDeserializer

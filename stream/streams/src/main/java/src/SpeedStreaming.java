@@ -15,7 +15,7 @@ public class SpeedStreaming {
     public static void main(String[] args) {
         // Configure Kafka Streams properties
         Properties config = new Properties();
-        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "speed-stream-app");
+        config.put(StreamsConfig.APPLICATION_ID_CONFIG, "speed-stream");
         config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9093,localhost:9094");
 
         // Additional configurations

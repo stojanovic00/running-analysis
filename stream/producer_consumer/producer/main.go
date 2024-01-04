@@ -70,9 +70,9 @@ func main() {
 	// Produce messages to topic (asynchronously)
 	topic := "run_stats"
 
-	statsCsv := readCSV("../../datasets/half_marathon_realtime.csv")
+	statsCsv := readCSV("../../../datasets/half_marathon_realtime.csv")
 
-	for idx, line := range statsCsv {
+	for _, line := range statsCsv {
 		time.Sleep(1 * time.Second)
 
 		message := ""
@@ -86,8 +86,9 @@ func main() {
 
 		p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-			Key:            []byte(strconv.Itoa(idx)),
-			Value:          []byte(message),
+			//Key:            []byte(strconv.Itoa(idx)), removed this maybe because of aggregation needs
+			Key:   []byte(strconv.Itoa(1)),
+			Value: []byte(message),
 		}, nil)
 	}
 

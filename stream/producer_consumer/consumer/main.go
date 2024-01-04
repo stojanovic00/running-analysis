@@ -23,6 +23,7 @@ func main() {
 	defer client.Disconnect(context.Background())
 
 	speedCol := client.Database("streams-db").Collection("speed")
+	avgSpeedCol := client.Database("streams-db").Collection("avg-speed")
 	heartRateCol := client.Database("streams-db").Collection("heart_rate")
 
 	//Kafka
@@ -37,7 +38,7 @@ func main() {
 	}
 	defer c.Close()
 
-	c.SubscribeTopics([]string{"speed", "heart_rate"}, nil)
+	c.SubscribeTopics([]string{"speed", "heart_rate", "avg-speed"}, nil)
 
 	// A signal handler or similar could be used to set this to false to break the loop.
 	run := true
@@ -70,6 +71,19 @@ func main() {
 					log.Println("Wrote to heart_rate")
 					if err != nil {
 						fmt.Println("Error writing to heart_rate")
+					}
+				}(time.Now().Add(time.Hour))
+			case "avg-speed":
+				go func(currTime time.Time) {
+					document := map[string]interface{}{
+						"time":      currTime,
+						"avg-speed": string(msg.Value),
+					}
+
+					_, err = avgSpeedCol.InsertOne(context.Background(), document)
+					log.Println("Wrote to avg-speed")
+					if err != nil {
+						fmt.Println("Error writing to speed")
 					}
 				}(time.Now().Add(time.Hour))
 			}
