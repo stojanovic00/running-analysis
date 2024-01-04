@@ -6,5 +6,5 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-docker exec kafka1 kafka-topics --delete --topic $1 --zookeeper zoo:2181
+docker exec kafka1 kafka-topics --delete --topic $1 --bootstrap-server "kafka1:19092,kafka2:19093,kafka3:19094"
 

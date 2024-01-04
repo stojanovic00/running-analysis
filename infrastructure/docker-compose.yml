@@ -44,7 +44,7 @@ services:
     ulimits: *ulimits_def
 
   spark-master:
-    image: bde2020/spark-master:3.0.1-hadoop3.2
+    image: bde2020/spark-master:${SPARK_MASTER_VERSION:-3.0.1-hadoop3.2}
     container_name: spark-master
     ports:
       - 8080:8080
@@ -55,9 +55,10 @@ services:
       - ./hadoop.env
     volumes:
       - ../batch:/batch-scripts
+      - ../stream/streams:/stream-scripts
 
   spark-worker1:
-    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    image: bde2020/spark-worker:${SPARK_WORKER_VERSION:-3.0.1-hadoop3.2}
     container_name: spark-worker1
     depends_on:
       - spark-master
@@ -69,7 +70,7 @@ services:
       - ./hadoop.env
   
   spark-worker2:
-    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    image: bde2020/spark-worker:${SPARK_WORKER_VERSION:-3.0.1-hadoop3.2}
     container_name: spark-worker2
     depends_on:
       - spark-master
