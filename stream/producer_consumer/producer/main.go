@@ -87,8 +87,9 @@ func main() {
 		p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 			//Key:            []byte(strconv.Itoa(idx)), removed this maybe because of aggregation needs
-			Key:   []byte(strconv.Itoa(1)),
-			Value: []byte(message),
+			Key:       []byte(strconv.Itoa(1)),
+			Value:     []byte(message),
+			Timestamp: time.Now(),
 		}, nil)
 	}
 

@@ -1,6 +1,6 @@
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, round
+from pyspark.sql.functions import col, round, split
 
 conf = SparkConf() \
     .setAppName("speed-streamer") \
@@ -26,15 +26,19 @@ df = spark.readStream \
     .option("failOnDataLoss", "false") \
     .load()
 
-csv_df = df.select(col("value").cast("string"))
+csv_df = df.select(col("value").cast("string"), col("timestamp"))
 
-# Extract speed
-speed_df = csv_df.selectExpr("split(value, ',')[6] as value")
+# Extract speed and keep timestamp
+speed_df = csv_df.select(
+    col("timestamp"),
+    split(col("value"), ',')[6].alias("value")
+)
 
 # Round speed to 4 decimals
 speed_df = speed_df.withColumn("value", col("value").cast("float"))
 speed_df = speed_df.withColumn("value", round(col("value"), 4))
 speed_df = speed_df.withColumn("value", col("value").cast("string"))
+
 
 
 # Define Kafka parameters for writing to the "speed" topic

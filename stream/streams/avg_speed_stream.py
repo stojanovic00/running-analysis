@@ -26,21 +26,22 @@ df = spark.readStream \
     .option("failOnDataLoss", "false") \
     .load()
 
-raw_df = df.select(col("value").cast("string"))
+raw_df = df.select(col("value").cast("string"), col("timestamp"))
 
 speed_df = raw_df.withColumn("speed", col("value").cast("float"))
 
-speed_df = speed_df.withColumn("time", current_timestamp())
 
 # Define the windowed aggregation
 windowed_avg_speed_df = speed_df \
-    .withWatermark("time", "1 seconds") \
-    .groupBy(window("time", "10 seconds", "1 second")) \
+    .withWatermark("timestamp", "1 seconds") \
+    .groupBy(window("timestamp", "10 seconds", "1 second")) \
     .agg(avg("speed").alias("value"))
 
 
 windowed_avg_speed_df = windowed_avg_speed_df.withColumn("value", round(col("value"), 4))
 windowed_avg_speed_df = windowed_avg_speed_df.withColumn("value", col("value").cast("string"))
+
+windowed_avg_speed_df = windowed_avg_speed_df.withColumn("timestamp", col("window.start"))
 
 # Define Kafka parameters for writing to the "speed" topic
 write_kafka_params = {
@@ -49,8 +50,6 @@ write_kafka_params = {
 }
 
 
-# Write the speed data to the "speed" topic
-#     query = speed_df.writeStream \
 query = windowed_avg_speed_df.writeStream \
     .outputMode("append") \
     .format("kafka") \
