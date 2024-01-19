@@ -198,6 +198,7 @@ services:
     depends_on:
       - zoo
     ulimits: *ulimits_def
+    restart: always
 
   kafka2:
     image: confluentinc/cp-kafka:latest
@@ -217,6 +218,7 @@ services:
     depends_on:
       - zoo
     ulimits: *ulimits_def
+    restart: always
 
 
   kafka3:
@@ -237,6 +239,7 @@ services:
     depends_on:
       - zoo
     ulimits: *ulimits_def
+    restart: always
 
   streams-db:
     image: mongo:latest
