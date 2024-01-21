@@ -13,7 +13,7 @@
 --BEGIN
 --    -- Update the elev_gain_total table with the maximum date and sum of values
 --    INSERT INTO elev_gain_total (time, value)
---    SELECT MAX(time), SUM(value)
+--    SELECT NOW(), SUM(value)
 --    FROM altitude_gain;
 --
 --    RETURN NEW;
@@ -26,8 +26,15 @@
 --EXECUTE FUNCTION update_elev_gain_total();
 
 -- ### RAW TESTING ###
-truncate elev_gain_total;
-truncate altitude_gain ;
-
 --INSERT INTO altitude_gain (time, value)
 --VALUES ('2021-01-21 10:36:00', 5.0);
+
+truncate avg_speed;
+truncate pace;
+truncate comparison;
+truncate elev_gain_total;
+truncate altitude_gain ;
+truncate finish_estimation ;
+
+
+

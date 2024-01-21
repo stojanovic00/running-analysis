@@ -69,12 +69,39 @@ write_kafka_params = {
     "topic": "current_speed_comp"
 }
 
-query = status_df.writeStream \
+kafka_query = status_df.writeStream \
     .outputMode("append") \
     .format("kafka") \
     .options(**write_kafka_params) \
     .option("checkpointLocation", "hdfs://namenode:9000/tmp/current_speed_comp_streamer/") \
     .start()
 
+# Write to postgres
+def write_to_postgres(micro_batch_df, batch_id):
+    # JDBC connection properties
+    jdbc_url = "jdbc:postgresql://citus-coordinator:5432/running-analytics"
+    pg_properties = {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+    }
+
+    # Write the micro-batch DataFrame to PostgreSQL
+    micro_batch_df.select(col("time").alias("time"), col("comparison").alias("comparison")).write \
+        .format("jdbc") \
+        .option("url", jdbc_url) \
+        .option("dbtable", "comparison") \
+        .option("user", pg_properties["user"]) \
+        .option("password", pg_properties["password"]) \
+        .option("driver", pg_properties["driver"]) \
+        .mode("append") \
+        .save()
+
+# Start the streaming query with foreachBatch
+pg_query = status_df.writeStream \
+    .foreachBatch(write_to_postgres) \
+    .outputMode("append") \
+    .start()
+
 # Wait for the streaming query to finish
-query.awaitTermination()
+spark.streams.awaitAnyTermination()

@@ -57,20 +57,46 @@ avg_speed_df = avg_speed_df.withColumn("time_str", date_format("time_end", "yyyy
 
 avg_speed_df = avg_speed_df.withColumn("value", concat(col("time_str"), lit(","), col("avg_speed_str")))
 
-# Define Kafka parameters for writing to the "speed" topic
+# Write to kafka
 write_kafka_params = {
     "kafka.bootstrap.servers": "kafka1:19092,kafka2:19093,kafka3:19094",
     "topic": "avg_speed"
 }
 
 
-query = avg_speed_df.writeStream \
+kafka_query = avg_speed_df.writeStream \
     .outputMode("append") \
     .format("kafka") \
     .options(**write_kafka_params) \
     .option("checkpointLocation", "hdfs://namenode:9000/tmp/avg_speed_streamer/") \
     .start()
 
+# Write to postgres
+def write_to_postgres(micro_batch_df, batch_id):
+    # JDBC connection properties
+    jdbc_url = "jdbc:postgresql://citus-coordinator:5432/running-analytics"
+    pg_properties = {
+        "user": "postgres",
+        "password": "postgres",
+        "driver": "org.postgresql.Driver"
+    }
+
+    # Write the micro-batch DataFrame to PostgreSQL
+    micro_batch_df.select(col("window.end").alias("time"), col("avg_speed").alias("avg_speed")).write \
+        .format("jdbc") \
+        .option("url", jdbc_url) \
+        .option("dbtable", "avg_speed") \
+        .option("user", pg_properties["user"]) \
+        .option("password", pg_properties["password"]) \
+        .option("driver", pg_properties["driver"]) \
+        .mode("append") \
+        .save()
+
+# Start the streaming query with foreachBatch
+pg_query = avg_speed_df.writeStream \
+    .foreachBatch(write_to_postgres) \
+    .outputMode("append") \
+    .start()
 
 # Wait for the streaming query to finish
-query.awaitTermination()
+spark.streams.awaitAnyTermination()

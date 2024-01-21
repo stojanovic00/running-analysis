@@ -241,16 +241,16 @@ services:
     ulimits: *ulimits_def
     restart: always
 
-  streams-db:
-    image: mongo:latest
-    container_name: streams-db
-    ports:
-      - "27017:27017"
-    volumes:
-      - streams-db:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
+# streams-db:
+#   image: mongo:latest
+#   container_name: streams-db
+#   ports:
+#     - "27017:27017"
+#   volumes:
+#     - streams-db:/data/db
+#   environment:
+#     MONGO_INITDB_ROOT_USERNAME: mongo
+#     MONGO_INITDB_ROOT_PASSWORD: mongo
 
 
 volumes:
