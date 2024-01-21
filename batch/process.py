@@ -123,15 +123,15 @@ distance_constrained_df = distance_constrained_df.withColumn("id", monotonically
 
 # Define the simplified bins
 dist_groups = [
-    (40, 65), (65, 90), (90, 120), (120, 200),
-    (200, 1000), (1000, 6000)
+    (0, 40), (40, 65), (65, 90), (90, 120),
+    (120, 200), (200, 1000), (1000, 6000)
 ]
 
 # Create a new column representing the distance group
 distance_constrained_df = distance_constrained_df.withColumn(
     "distance_group_km",
     when(
-        (col("distance_km").isNull() | (col("distance_km") < 40)),
+        (col("distance_km").isNull() | (col("distance_km") <= 0)),
         None
     ).otherwise(  # This makes case for every distance group
     expr(
