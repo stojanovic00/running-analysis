@@ -121,7 +121,6 @@ distance_constrained_df = distance_constrained_df.withColumn("id", monotonically
 
 # Grouping marathons depending on size
 
-# Define the simplified bins
 dist_groups = [
     (0, 40), (40, 65), (65, 90), (90, 120),
     (120, 200), (200, 1000), (1000, 6000)
@@ -152,5 +151,32 @@ distance_constrained_df = distance_constrained_df.withColumn(
 )
 )
 
+# Calculating age group for runner
+dist_groups = [
+    (17, 30), (30, 45), (45, 120)
+]
+distance_constrained_df = distance_constrained_df.withColumn(
+    "age_group",
+    when(
+        (col("athlete_age").isNull() | (col("athlete_age") <= 0)),
+        None
+    ).otherwise(  # This makes case for every distance group
+        expr(
+            """
+            CASE {}
+            ELSE '{}'
+            END
+            """.format(
+                "".join(
+                    [
+                        "WHEN athlete_age >= {} AND athlete_age < {} THEN '{}'\n".format(lower, upper, f"{lower}-{upper}")
+                        for lower, upper in dist_groups
+                    ]
+                ),
+                None
+            )
+        )
+    )
+)
 # Writing distance_constrained to db
 distance_constrained_df.write.jdbc(jdbc_url, "public.running_distance_constrained", mode="overwrite", properties=pg_properties)

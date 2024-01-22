@@ -1,0 +1,36 @@
+-- Marathons with greatest average speed per distance group
+SELECT
+    year_of_event,
+    event_name,
+    distance_group_km,
+    distance_km,
+    athlete_num,
+    avg_athlete_speed_kmph,
+    rank
+FROM (
+    SELECT
+        year_of_event,
+        event_name,
+        distance_group_km,
+        distance_km,
+        count(*) as athlete_num,
+        avg(athlete_average_speed_kmph) AS avg_athlete_speed_kmph,
+        DENSE_RANK() OVER (PARTITION BY distance_group_km ORDER BY avg(athlete_average_speed_kmph) DESC) AS rank
+    FROM
+        public.running_distance_constrained AS rdc
+    WHERE
+        distance_group_km IS NOT null
+        AND distance_group_km != '0-40'
+        AND athlete_average_speed_kmph != 0
+    GROUP BY
+        year_of_event,
+        event_name,
+        distance_group_km,
+        distance_km
+    HAVING count(*) > 10
+) AS ranked_results
+WHERE rank <= 10
+ORDER BY
+    CAST(SPLIT_PART(distance_group_km, '-', 1) AS INTEGER) ASC,
+    rank ASC;
+
