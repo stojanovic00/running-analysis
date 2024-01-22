@@ -254,4 +254,3 @@ volumes:
   citus-node1:
   citus-node2:
   metabase-db:
-  streams-db:
