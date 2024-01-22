@@ -1,4 +1,0 @@
-use streams-db;
-db.getCollection("heart_rate").deleteMany({});
-db.getCollection("speed").deleteMany({});
-db.getCollection("avg-speed").deleteMany({});

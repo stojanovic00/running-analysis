@@ -70,6 +70,36 @@ time_constrained_df = time_constrained_df.drop("athlete_average_speed")
 time_constrained_df = time_constrained_df.withColumn("id", monotonically_increasing_id())
 
 
+# Calculating age group for runner
+dist_groups = [
+    (17, 30), (30, 45), (45, 120)
+]
+# Making
+time_constrained_df = time_constrained_df.withColumn(
+    "age_group",
+    when(
+        (col("athlete_age").isNull() | (col("athlete_age") <= 0)),
+        None
+    ).otherwise(  # This makes case for every distance group
+        expr(
+            """
+            CASE {}
+            ELSE '{}'
+            END
+            """.format(
+                "".join(
+                    [
+                        "WHEN athlete_age >= {} AND athlete_age < {} THEN '{}'\n".format(lower, upper, f"{lower}-{upper}")
+                        for lower, upper in dist_groups
+                    ]
+                ),
+                None
+            )
+        )
+    )
+)
+
+
 # Writing time_constrained to db
 time_constrained_df.write.jdbc(jdbc_url, "public.running_time_constrained", mode="overwrite", properties=pg_properties)
 
@@ -178,5 +208,8 @@ distance_constrained_df = distance_constrained_df.withColumn(
         )
     )
 )
+
+
+
 # Writing distance_constrained to db
 distance_constrained_df.write.jdbc(jdbc_url, "public.running_distance_constrained", mode="overwrite", properties=pg_properties)
