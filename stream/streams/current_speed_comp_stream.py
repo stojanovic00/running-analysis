@@ -103,5 +103,15 @@ pg_query = status_df.writeStream \
     .outputMode("append") \
     .start()
 
+# Write to hdfs
+status_df.select(col("value")) \
+    .writeStream \
+    .outputMode("append") \
+    .format("csv") \
+    .option("path", "hdfs://namenode:9000/streams_csv/speed_comp") \
+    .option("checkpointLocation", "/tmp/csv/speed_comp") \
+    .start()
+
+
 # Wait for the streaming query to finish
 spark.streams.awaitAnyTermination()

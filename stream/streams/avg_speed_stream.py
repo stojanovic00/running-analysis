@@ -38,7 +38,6 @@ speed_df = speed_df.withColumn("time", to_timestamp(col("time_str")))
 speed_df = speed_df.withColumn("speed", col("speed_str").cast("float"))
 
 
-# Define the windowed aggregation
 avg_speed_df = speed_df \
     .withWatermark("time", "1 seconds") \
     .groupBy(window("time", "5 seconds", "5 seconds")) \
@@ -92,11 +91,20 @@ def write_to_postgres(micro_batch_df, batch_id):
         .mode("append") \
         .save()
 
-# Start the streaming query with foreachBatch
 pg_query = avg_speed_df.writeStream \
     .foreachBatch(write_to_postgres) \
     .outputMode("append") \
     .start()
+
+# Write to hdfs
+avg_speed_df.select(col("value")) \
+    .writeStream \
+    .outputMode("append") \
+    .format("csv") \
+    .option("path", "hdfs://namenode:9000/streams_csv/avg_speed") \
+    .option("checkpointLocation", "/tmp/csv/avg_speed") \
+    .start()
+
 
 # Wait for the streaming query to finish
 spark.streams.awaitAnyTermination()

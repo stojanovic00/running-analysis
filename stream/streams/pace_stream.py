@@ -92,5 +92,14 @@ pg_query = pace_df.writeStream \
     .outputMode("append") \
     .start()
 
-# Wait for the streaming query to finish
+
+# Write to hdfs
+pace_df.select(col("value")) \
+    .writeStream \
+    .outputMode("append") \
+    .format("csv") \
+    .option("path", "hdfs://namenode:9000/streams_csv/pace") \
+    .option("checkpointLocation", "/tmp/csv/pace") \
+    .start()
+
 spark.streams.awaitAnyTermination()

@@ -86,7 +86,6 @@ write_kafka_params = {
 }
 
 
-# Write the speed data to the "speed" topic
 query = joined_df.writeStream \
     .outputMode("append") \
     .format("kafka") \
@@ -95,5 +94,14 @@ query = joined_df.writeStream \
     .start()
 
 
-# Wait for the streaming query to finish
-query.awaitTermination()
+# Write to hdfs
+joined_df.select(col("value")) \
+    .writeStream \
+    .outputMode("append") \
+    .format("csv") \
+    .option("path", "hdfs://namenode:9000/streams_csv/altitude") \
+    .option("checkpointLocation", "/tmp/csv/altitude") \
+    .start()
+
+
+spark.streams.awaitAnyTermination()
