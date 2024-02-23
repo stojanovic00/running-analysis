@@ -11,6 +11,7 @@
 
 ![Architecture](docs/architecture.jpg)
 - Raw batch data is stored on HDFS, processed with pyspark and stored inside Citus analytical database. Results are displayed using Metabase.
+- Real time processing processes data that is being produced by Go producer and written to Kafka topics. Using PySpark, data from input topic is used to calculate real-time information of runners pace, average speed, total elevation gain, comparison between current and average speed (faster/slower) and prediction of runners finish time based on its earlier results on marathons of the same size and stats on current race. All calculated informations are written to dedicated topics and also stored inside Citus database and HDFS. 
 
 
 ## Running application
