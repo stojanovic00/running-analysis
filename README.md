@@ -2,7 +2,7 @@
 
 ## About
 - Analysis of dataset of ultramarathon races spanning from 1798. to 2022. 
-- Real time tracking of runners performance, that also incorporates information extracted from batch dataset
+- Real time tracking of runners performance during marathon, that also incorporates information extracted from batch dataset
 - Used datasets: 
     - batch: https://www.kaggle.com/datasets/aiaiaidavid/the-big-dataset-of-ultra-marathon-running?select=TWO_CENTURIES_OF_UM_RACES.csv
     - stream: https://data.world/jarnoma/half-marathon
